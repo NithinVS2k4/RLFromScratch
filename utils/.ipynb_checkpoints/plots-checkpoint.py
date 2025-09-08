@@ -82,9 +82,11 @@ def animate_policy(env, policy, FPS: int = 12, do_truncate: bool = True):
     while True:
         start_time = time.time()
         if is_discrete: 
+            if isinstance(s, int): s = [s]
             probs = policy(torch.FloatTensor(s))
             dist =  torch.distributions.Categorical(torch.as_tensor(probs))
             action = dist.sample().item()
+            if not isinstance(action, int): action = action.detach().numpy()
         else: 
             mu, std = policy(torch.FloatTensor(s))
             dist = torch.distributions.Normal(mu, std)
@@ -114,7 +116,7 @@ def animate_policy(env, policy, FPS: int = 12, do_truncate: bool = True):
 
         plt.show()
 
-        s, r, terminated, truncated, _ = env.step(action.detach().numpy())
+        s, r, terminated, truncated, _ = env.step(action)
         r = float(r)
         
         end_time = time.time()
